@@ -1,6 +1,6 @@
 # metralectl
 
-Launch [Metrale Engine](https://github.com/Metrale/metrale-inference-alpha) inference recipes
+Launch [Metrale Engine](https://github.com/Metrale/metrale-inference) inference recipes
 on NVIDIA DGX Spark (GB10) and other local accelerators.
 
 A recipe describes one model deployment — the checkpoint, the container image,

@@ -251,7 +251,7 @@ fn node_info_round_trips() {
         metrale_repo: Some(RepoInfo {
             path: "/workspace/metrale".into(),
             remote_name: "origin".into(),
-            remote_url: "https://github.com/Metrale/metrale-inference-alpha.git".into(),
+            remote_url: "https://github.com/Metrale/metrale-inference.git".into(),
             head_sha: Some(sha()),
             fetched_at_s: Some(1),
         }),

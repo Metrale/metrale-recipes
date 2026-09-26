@@ -1,7 +1,7 @@
 # metralectl
 
 `metralectl` installs, launches and benchmarks the
-[Metrale inference engine](https://github.com/Metrale/metrale-inference-alpha)
+[Metrale inference engine](https://github.com/Metrale/metrale-inference)
 on NVIDIA DGX Spark (GB10) and other local accelerators.
 
 - **Recipes.** A recipe is one validated model deployment: the checkpoint, the
