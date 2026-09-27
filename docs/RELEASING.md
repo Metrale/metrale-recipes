@@ -10,9 +10,9 @@ Merges to `main` do not publish. release-please maintains a standing
 it tags, builds, and publishes everything since the last one.
 
 That reconciles "merging to main ships" with the fact that crates.io versions
-are immutable. Recipe edits — which are this repository's main traffic — land on
-`main` immediately and are visible to the website, and they accumulate in the
-pending release PR rather than burning a version each.
+are immutable. Recipe updates — the engine-recipes workflow's pull requests,
+which move `vendor/engine-pin.toml` to a newer engine release — land on `main`
+and accumulate in the pending release PR rather than burning a version each.
 
 Commit titles decide the version, so they must be conventional commits:
 `feat:` for a minor bump, `fix:` for a patch, `feat!:` or a `BREAKING CHANGE:`
@@ -67,8 +67,12 @@ finds the executable without `--from`, and `uv tool install metralectl` puts
 
 Recipes are compiled in, so **a recipe change only reaches users when a release
 ships**. That is the security property, not an oversight: there is no remote
-registry to redirect and nothing fetched at runtime. The website reads recipes
-from git, so it reflects `main` immediately either way.
+registry to redirect and nothing fetched at runtime. The recipes themselves are
+written in the engine repository and mirrored here from one pinned engine
+release; see [vendor/README.md](../vendor/README.md#engine-pintoml).
+
+The engine-recipes workflow's pull request is pushed by the same bot as the
+release PR, so its CI runs wait for approval in the same way (above).
 
 The workspace root is itself a package (`metrale-recipes-data`) for this reason —
 `cargo package` only includes files beneath the crate root, so a crate under

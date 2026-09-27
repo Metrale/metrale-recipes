@@ -6,8 +6,11 @@ on NVIDIA DGX Spark (GB10) and other local accelerators.
 
 - **Recipes.** A recipe is one validated model deployment: the checkpoint, the
   container image and the `met serve` settings. The recipes in
-  [`recipes/`](recipes/) ship inside the binary, so resolving one needs no
-  network request, and a remote registry can supply recipe data but can never
+  [`recipes/`](recipes/) are written in the
+  [engine repository](https://github.com/Metrale/metrale-inference/tree/main/recipes)
+  and mirrored here from one pinned engine release
+  ([`vendor/engine-pin.toml`](vendor/README.md#engine-pintoml)). They ship
+  inside the binary, so resolving one needs no network request, and a remote registry can supply recipe data but can never
   make `metralectl` run a command. [SECURITY.md](SECURITY.md) explains why.
 - **CLI.** `metralectl` reads a recipe and runs the `docker run` it implies, or
   prints it for you to review first.

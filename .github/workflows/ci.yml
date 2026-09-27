@@ -62,6 +62,22 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo check --workspace --locked
 
+  engine-mirror:
+    name: recipes and flag snapshot equal the pinned engine release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      # recipes/ and vendor/serve-options.v2.json are owned by
+      # Metrale/metrale-inference and mirrored from the one release named in
+      # vendor/engine-pin.toml. This is what refuses a hand edit to either: the
+      # only passing change is one that moves the pin to a release whose
+      # assets ARE the new content, which is what the engine-recipes workflow
+      # writes.
+      - name: The guard refuses every way the mirror can be wrong
+        run: python3 scripts/tests/engine-recipes.test.py
+      - name: The tree equals the pinned release's assets
+        run: python3 scripts/engine-recipes.py check --root .
+
   version-sync:
     name: internal version requirements match their packages
     runs-on: ubuntu-24.04

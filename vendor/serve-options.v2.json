@@ -1290,6 +1290,16 @@
       "doc": "`METRALE_ADADEC_DIAGNOSTIC=dir` — the adaptive-decode entropy trace."
     },
     {
+      "env": "METRALE_AGENTIC_PRESERVE_THINKING",
+      "path": "sampling.agentic_preserve_thinking",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/bench/src/benchmarks/agentic/agent_history.rs",
+      "doc": "`METRALE_AGENTIC_PRESERVE_THINKING=1`: echo each turn's non-empty reasoning as `reasoning_content` in its assistant message, and send `preserve_thinking: true` in `chat_template_kwargs`. `1` turns it on."
+    },
+    {
       "env": "METRALE_AGENTIC_SAMPLING",
       "path": "server.agentic_sampling",
       "type": "text",
@@ -1420,6 +1430,16 @@
       "doc": "Read in `crates/model-layers/src/layers/qwen3_attention/prefill/cache_skip_qkv.rs`. `1` turns it on."
     },
     {
+      "env": "METRALE_ATTN_QKV_W8A16_ONLY",
+      "path": "cache.attn_qkv_w8a16_only",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_attention/prefill_qkv_w8a8.rs",
+      "doc": "Keeps the cache-skip Q/K/V prefill on W8A16, like `METRALE_FFN_W8A16_ONLY`. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_ATTN_W4A4",
       "path": "kernels.attn_w4a4",
       "type": "switch",
@@ -1468,6 +1488,16 @@
       "class": "dev",
       "reader": "crates/model-arch/examples/attn_prefill_fp8_microtest.rs",
       "doc": "Gated by METRALE_BENCH_ITERS so the correctness gate stays the default behaviour."
+    },
+    {
+      "env": "METRALE_BF16_QKV_BATCHM",
+      "path": "scheduler.bf16_qkv_batchm",
+      "type": "switch",
+      "default": "on",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_attention/trait_impl/multi_seq/qkv.rs",
+      "doc": "The batched dense-BF16 decode GEMVs (q/k/v here; the O and head gate projections in `attn/o_proj.rs`) are on unless `METRALE_BF16_QKV_BATCHM=0`. `0` turns it off."
     },
     {
       "env": "METRALE_BF16_ROUTER",
@@ -1790,6 +1820,16 @@
       "doc": "The grouped NVFP4 MoE path (single-launch kGrouped over up to 256 experts) stages packed-A + SFA + per-group arrays + the gemm workspace here; at large prefill M the 256-group gemm workspace alone..."
     },
     {
+      "env": "METRALE_D2H_SPIN_SYNC",
+      "path": "server.d2h_spin_sync",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/gpu-runtime/src/cuda_backend/gpu_copy.rs",
+      "doc": "METRALE_D2H_SPIN_SYNC=1 (read once) busy-polls `cuStreamQuery` until it stops returning CUDA_ERROR_NOT_READY, instead of blocking in `cuStreamSynchronize`. `1` turns it on."
+    },
+    {
       "env": "METRALE_D2H_TRACE",
       "path": "telemetry.d2h_trace",
       "type": "text",
@@ -1878,6 +1918,16 @@
       "class": "runtime",
       "reader": "crates/model-arch/src/weight_loader/qwen35_dense/predicted_residency.rs",
       "doc": "`METRALE_DENSE_FP8=1` — `qwen35_dense::dense_fp8_enabled`. `1` turns it on."
+    },
+    {
+      "env": "METRALE_DENSE_FP8_KEEP_NVFP4",
+      "path": "kernels.dense_fp8_keep_nvfp4",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/weight_loader/qwen35_dense/fp8_residency.rs",
+      "doc": "The dense FP8 residency plan builds every NVFP4 copy even where the dispatch cannot reach it. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_DFLASH2",
@@ -2550,6 +2600,26 @@
       "doc": "Read in `crates/model-arch/src/weight_loader/deepseek_v41/load_layers.rs`."
     },
     {
+      "env": "METRALE_DS41_DEVICE_ROUTE",
+      "path": "runtime.ds41_device_route",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/moe_v41/device_route.rs",
+      "doc": "The single-token routing on the device (`METRALE_DS41_DEVICE_ROUTE=1`). `1` turns it on."
+    },
+    {
+      "env": "METRALE_DS41_DEVICE_ROUTE_DIAG",
+      "path": "telemetry.ds41_device_route_diag",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/moe_v41/device_route.rs",
+      "doc": "`METRALE_DS41_DEVICE_ROUTE_DIAG=1` also runs the host chain on the same logits and checks the picks, the weight bits, the plan weights and the pointer table on every token (a mismatch fails the step). `1` turns it on."
+    },
+    {
       "env": "METRALE_DS41_DIAG",
       "path": "telemetry.ds41_diag",
       "type": "switch",
@@ -2630,6 +2700,16 @@
       "doc": "`METRALE_DS41_GRAPH_ORACLE=1` runs every layer BOTH ways and compares the highway bit for bit; `METRALE_DS41_GRAPH=1` replays the captured segments; anything else is the eager step. `1` turns it on."
     },
     {
+      "env": "METRALE_DS41_KEEP_PAGE_CACHE",
+      "path": "cache.ds41_keep_page_cache",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-weights/src/weights/gguf/expert_reads.rs",
+      "doc": "`METRALE_DS41_KEEP_PAGE_CACHE=1` keeps the old behaviour. `1` turns it on."
+    },
+    {
       "env": "METRALE_DS41_KQUANT_RESIDENT",
       "path": "model.ds41_kquant_resident",
       "type": "text",
@@ -2638,6 +2718,16 @@
       "class": "runtime",
       "reader": "crates/model-weights/src/weights/gguf/sidecar.rs",
       "doc": "DeepSeek-V4.1 attention projections and shared expert stay Q2_K / Q3_K (ggml types 10 / 11) on the device; METRALE_DS41_KQUANT_RESIDENT=0 restores the bf16 expansion."
+    },
+    {
+      "env": "METRALE_DS41_M1_LOOP",
+      "path": "scheduler.ds41_m1_loop",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/moe_v41/forward.rs",
+      "doc": "`METRALE_DS41_M1_LOOP=1`, read once: a single token runs through the per-expert group loop of `forward` (one-row groups on the decode GEMV) instead of the pointer-table arm (`routed_m1`). `1` turns it on."
     },
     {
       "env": "METRALE_DS41_MAX_SEQ",
@@ -2690,6 +2780,16 @@
       "doc": "`METRALE_DS41_PREFETCH_K` (default 0 = off), read once: how many of the next layer's predicted experts to start reading while this layer computes (needs `METRALE_DS41_READER_POOL=1`)."
     },
     {
+      "env": "METRALE_DS41_PREFILL_GEMV",
+      "path": "scheduler.ds41_prefill_gemv",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/moe_v41/forward.rs",
+      "doc": "`METRALE_DS41_PREFILL_GEMV=1`, read once: expert groups of more than eight rows run on the decode GEMV in chunks of at most eight rows instead of the MMQ arm (see `forward`). `1` turns it on."
+    },
+    {
       "env": "METRALE_DS41_Q6K_HEAD",
       "path": "model.ds41_q6k_head",
       "type": "text",
@@ -2720,6 +2820,16 @@
       "doc": "16 readers: one 12.22 MiB expert reads in ~2 ms whatever the split, but a prefill's gather of hundreds runs at the disk's 10-11 GB/s only past eight threads (09-19 NVMe probe)"
     },
     {
+      "env": "METRALE_DS41_ROUTER_STAGED",
+      "path": "model.ds41_router_staged",
+      "type": "switch",
+      "default": "on",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/moe_v41/route.rs",
+      "doc": "The staged single-token router GEMV; `METRALE_DS41_ROUTER_STAGED=0` selects the products form. `0` turns it off."
+    },
+    {
       "env": "METRALE_DS41_ROUTE_TRACE",
       "path": "telemetry.ds41_route_trace",
       "type": "text",
@@ -2728,6 +2838,16 @@
       "class": "runtime",
       "reader": "crates/model-arch/src/weight_loader/deepseek_v41/load_layers.rs",
       "doc": "Read in `crates/model-arch/src/weight_loader/deepseek_v41/load_layers.rs`."
+    },
+    {
+      "env": "METRALE_DS41_SHARED_SIDE",
+      "path": "model.ds41_shared_side",
+      "type": "switch",
+      "default": "on",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/moe_v41.rs",
+      "doc": "At one token the shared expert runs on a side stream while the main stream runs the router; the accumulation order does not change. `0` turns it off."
     },
     {
       "env": "METRALE_DS41_SPARSE_SPLIT",
@@ -2748,6 +2868,36 @@
       "class": "runtime",
       "reader": "crates/model-arch/src/weight_loader/deepseek_v41/load_layers.rs",
       "doc": "Read in `crates/model-arch/src/weight_loader/deepseek_v41/load_layers.rs`."
+    },
+    {
+      "env": "METRALE_DS41_STEP_GRAPH",
+      "path": "scheduler.ds41_step_graph",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/deepseek_v41_layer/step_seg.rs",
+      "doc": "The single-token step as a few CUDA graphs spanning layers (`METRALE_DS41_STEP_GRAPH=1`, which needs `METRALE_DS41_DEVICE_ROUTE=1`). `1` turns it on."
+    },
+    {
+      "env": "METRALE_DS41_STEP_GRAPH_LOG",
+      "path": "telemetry.ds41_step_graph_log",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/deepseek_v41_layer/step_seg.rs",
+      "doc": "`METRALE_DS41_STEP_GRAPH_LOG=1`, read once: the running counts whenever the last segment replays without a miss, and a line per segment miss. `1` turns it on."
+    },
+    {
+      "env": "METRALE_DS41_TRACE",
+      "path": "telemetry.ds41_trace",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/deepseek_v41_layer/step.rs",
+      "doc": "The eager single-token step synchronises and logs FNV-1a checksums of each layer's attention output, normed input and MoE input. `1` turns it on."
     },
     {
       "env": "METRALE_DSA_SELECT_ROWS",
@@ -3030,6 +3180,16 @@
       "doc": "Read in `crates/server/src/main_modules/serve_phases/weights.rs`. `1` or `true` turns it on."
     },
     {
+      "env": "METRALE_FFN_BATCH16",
+      "path": "scheduler.ffn_batch16",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/dense_ffn_batch16_decode.rs",
+      "doc": "Whether `METRALE_FFN_BATCH16` is exactly `1`, which arms the tier; any other value, or none, leaves it off. `1` turns it on."
+    },
+    {
       "env": "METRALE_FFN_GATEUP_FUSED",
       "path": "kernels.ffn_gateup_fused",
       "type": "switch",
@@ -3088,6 +3248,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ops/model_levers_resolve.rs",
       "doc": "Sets `ffn_small_m` (read in `crates/model-layers/src/layers/ops/model_levers_resolve.rs`). `0` turns it off."
+    },
+    {
+      "env": "METRALE_FFN_W8A16_ONLY",
+      "path": "kernels.ffn_w8a16_only",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/dense_ffn_w8a8_prefill.rs",
+      "doc": "By presence: no dense-FFN projection takes the W8A8 prefill arm. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_FLASHINFER_PREFILL",
@@ -3460,6 +3630,16 @@
       "doc": "`METRALE_GDN_PREFILL_TC` was PRESENCE-gated and is now grammar-gated like its neighbours, so `=0` turns it OFF instead of on."
     },
     {
+      "env": "METRALE_GDN_SMEM_STAGE",
+      "path": "kernels.gdn_smem_stage",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_multi_seq/ssm_batched_recurrent.rs",
+      "doc": "Selects the SMEM-staged gated-delta-rule decode twin in the batched recurrent step. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_GDN_TC_VBLOCK",
       "path": "cache.gdn_tc_vblock",
       "type": "switch",
@@ -3670,6 +3850,16 @@
       "doc": "`METRALE_GLM_KDA_CHUNK_PREFILL=1` to enable. `1` turns it on."
     },
     {
+      "env": "METRALE_GLM_KDA_NO_SMEM",
+      "path": "kernels.glm_kda_no_smem",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/glm5next_kda/mod.rs",
+      "doc": "`METRALE_GLM_KDA_NO_SMEM=1` selects the 2R+2W recurrent kernel. `1` turns it on."
+    },
+    {
       "env": "METRALE_GLM_MLP_WS_SHARED",
       "path": "model.glm_mlp_ws_shared",
       "type": "switch",
@@ -3678,6 +3868,26 @@
       "class": "runtime",
       "reader": "crates/model-arch/src/glm5next_mlp/forward.rs",
       "doc": "ONE MLP scratch for the whole layer stack; `METRALE_GLM_MLP_WS_SHARED=0` restores one per layer. `0` turns it off."
+    },
+    {
+      "env": "METRALE_GLM_MOE_GEMM_TILE",
+      "path": "kernels.glm_moe_gemm_tile",
+      "type": "text",
+      "default": "unset",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/glm5next_mlp/forward_prefill_gemm/tile.rs",
+      "doc": "The GLM MoE prefill GEMM tile (`gemm_tile`); an unknown name keeps the default tile."
+    },
+    {
+      "env": "METRALE_GLM_MOE_HOST_DISPATCH",
+      "path": "kernels.glm_moe_host_dispatch",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/glm5next_mlp/forward.rs",
+      "doc": "`METRALE_GLM_MOE_HOST_DISPATCH=1` forces the host-dispatch expert loop (ids read back to the host, one GEMV per local expert) and turns off every device-dispatched routed path. `1` turns it on."
     },
     {
       "env": "METRALE_GLM_MOE_PREFILL_GEMM",
@@ -3740,6 +3950,16 @@
       "doc": "DIAGNOSTIC ARM `METRALE_GLM_MTP_PREFILL_FULL=1`: build the row through the SAME full-block path a propose uses, so \"the KV-only shortcut is wrong\" and \"the drafter's attention over real context is..."
     },
     {
+      "env": "METRALE_GLM_MTP_SKIP",
+      "path": "speculative.glm_mtp_skip",
+      "type": "text",
+      "default": "unset",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/glm5next_mtp_head.rs",
+      "doc": "Timing arm `METRALE_GLM_MTP_SKIP=head`: the head is skipped and the draft is token 0, so `propose` times the block alone."
+    },
+    {
       "env": "METRALE_GLM_PREFILL_ROWS",
       "path": "scheduler.glm_prefill_rows",
       "type": "int",
@@ -3748,6 +3968,26 @@
       "class": "runtime",
       "reader": "crates/model-arch/src/glm5next_layer/levers.rs",
       "doc": "`PREFILL_ROWS`, overridable at launch with `METRALE_GLM_PREFILL_ROWS`. 🔬 Kept as the A/B lever it was built as."
+    },
+    {
+      "env": "METRALE_GLM_PROFILE",
+      "path": "telemetry.glm_profile",
+      "type": "text",
+      "default": "unset",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/glm5next_layer/profile.rs",
+      "doc": "Per-section decode timing for the GLM-5.3 layers: `1` times every span, `2` only the collective spans."
+    },
+    {
+      "env": "METRALE_GLM_ROUTE_TRACE",
+      "path": "telemetry.glm_route_trace",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/glm5next_layer/profile.rs",
+      "doc": "`METRALE_GLM_ROUTE_TRACE=1`: `trace_bar` logs one line per reduce site per layer with the rendezvous time and the expert ids `stash_route` last saved. `1` turns it on."
     },
     {
       "env": "METRALE_GLM_VERIFY_GRAPHS",
@@ -3878,6 +4118,16 @@
       "class": "harness",
       "reader": "crates/bench/src/benchmarks/agentic/warm.rs",
       "doc": "The agentic benchmark's harness port; read by the process driving requests, never by the server."
+    },
+    {
+      "env": "METRALE_HC_DECODE_SPLIT",
+      "path": "kernels.hc_decode_split",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/ops/hyper_connection_lowrank.rs",
+      "doc": "At `T <= 64` the hyper-connection collapse runs the three-launch split path instead of the cuBLASLt GEMM path. `1` turns it on."
     },
     {
       "env": "METRALE_HC_PERSEQ_DECODE",
@@ -4410,6 +4660,16 @@
       "doc": "Read in `crates/storage/src/kv_paging/backend.rs`."
     },
     {
+      "env": "METRALE_KV_TRACE",
+      "path": "telemetry.kv_trace",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/cache/src/kv_cache/block_trace.rs",
+      "doc": "With `METRALE_KV_TRACE=1`, every `alloc`, `try_alloc`, `inc`, `dec` and `evict_return` on a block is recorded in a ring for that block, with the caller's file and line (the `PagedKvCache` methods. `1` turns it on."
+    },
+    {
       "env": "METRALE_KV_ZERO_COPY",
       "path": "cache.kv_zero_copy",
       "type": "switch",
@@ -4600,6 +4860,36 @@
       "doc": "Row count at or below which the delta runs as `m` row-wise GEMVs instead of one GEMM (`METRALE_LORA_GEMV_MAX_M`, default 8)."
     },
     {
+      "env": "METRALE_LORA_NO_APPLY",
+      "path": "model.lora_no_apply",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/ops/lora_delta.rs",
+      "doc": "Keep the adapter resident but skip every `apply_lora_delta`: separates the cost of applying an adapter from the cost of having one loaded. `1` turns it on."
+    },
+    {
+      "env": "METRALE_LORA_NO_BATCH_VERIFY",
+      "path": "speculative.lora_no_batch_verify",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/lora/env.rs",
+      "doc": "`METRALE_LORA_NO_BATCH_VERIFY=1`, read once: while an adapter is loaded, cross-sequence batched verify is not eligible (model-engine `trait_impl/verify_e.rs`). `1` turns it on."
+    },
+    {
+      "env": "METRALE_LORA_NO_FFN",
+      "path": "kernels.lora_no_ffn",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/ops/lora_delta.rs",
+      "doc": "`METRALE_LORA_NO_FFN` equal to `\"1\"`, read once per process: the dense-FFN (`dense_ffn.rs`) and GDN out_proj (`qwen3_ssm/lora.rs`) skip their deltas, and the attention deltas still apply. `1` turns it on."
+    },
+    {
       "env": "METRALE_LORA_PEER",
       "path": "storage.lora_peer",
       "type": "text",
@@ -4607,7 +4897,17 @@
       "flag": null,
       "class": "runtime",
       "reader": "crates/model-layers/src/lora/env.rs",
-      "doc": "`$METRALE_LORA_PEER` (host:port of an `metrale-weight-peer` staging a rotation set) — when set, arms rotation (eager decode) even for a single resident slot, because an RDMA swap re-points that..."
+      "doc": "The host:port of the weight peer that stages adapters, when set and non-empty. Setting it also sets the model's `lora_rotatable`, as `METRALE_LORA_ROTATE` does."
+    },
+    {
+      "env": "METRALE_LORA_PREFILL_BGMV",
+      "path": "scheduler.lora_prefill_bgmv",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/lora/env.rs",
+      "doc": "`METRALE_LORA_PREFILL_BGMV=1`, read once: the attention QKV prefill applies LoRA with the per-row `apply_lora_bgmv` instead of `apply_lora_delta` when the call has a slot buffer and a. `1` turns it on."
     },
     {
       "env": "METRALE_LORA_RDMA_DEV",
@@ -4850,6 +5150,16 @@
       "doc": "Read in `crates/model-layers/src/layers/qwen3_attention/trait_impl/multi_seq/ffn.rs`. `1` turns it on."
     },
     {
+      "env": "METRALE_MOE_GROUPED_DECODE",
+      "path": "kernels.moe_grouped_decode",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/moe_grouped_decode.rs",
+      "doc": "`METRALE_MOE_GROUPED_DECODE=1` runs the arm below `moe_grouped_decode_min_rows()` too, for measuring narrow widths. `1` turns it on."
+    },
+    {
       "env": "METRALE_MOE_GROUPED_K32",
       "path": "kernels.moe_grouped_k32",
       "type": "switch",
@@ -4868,6 +5178,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/moe/init.rs",
       "doc": "Sets `moe_grouped_gemm_m256` (read in `crates/model-layers/src/layers/moe/init.rs`). `1` turns it on."
+    },
+    {
+      "env": "METRALE_MOE_GROUPED_ROUTED_DECODE",
+      "path": "kernels.moe_grouped_routed_decode",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_attention/trait_impl/multi_seq/ffn.rs",
+      "doc": "The opt-in grouped routed MoE arm (`forward_prefill`), `METRALE_MOE_GROUPED_ROUTED_DECODE=1`, read once per process. `1` turns it on."
     },
     {
       "env": "METRALE_MOE_GROUPED_ROUTED_DECODE_MIN",
@@ -4908,6 +5228,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ops/model_levers_resolve.rs",
       "doc": "Sets `moe_zero_intermediates` (read in `crates/model-layers/src/layers/ops/model_levers_resolve.rs`). Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_MOE_PAIRWISE_DECODE",
+      "path": "kernels.moe_pairwise_decode",
+      "type": "switch",
+      "default": "on",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_attention/trait_impl/multi_seq/ffn.rs",
+      "doc": "The pairwise MoE decode arm is on unless `METRALE_MOE_PAIRWISE_DECODE=0`, read once per process. `0` turns it off."
     },
     {
       "env": "METRALE_MOE_PREFILL_COPIES",
@@ -4998,6 +5328,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ops/model_levers_resolve.rs",
       "doc": "Sets `ms_profile` (read in `crates/model-layers/src/layers/ops/model_levers_resolve.rs`). `1` turns it on."
+    },
+    {
+      "env": "METRALE_MTP_ACCEPT_DEBUG",
+      "path": "telemetry.mtp_accept_debug",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/speculative/knobs.rs",
+      "doc": "`METRALE_MTP_ACCEPT_DEBUG`, on when set to any value. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_MTP_ACCEPT_FOLD_AT_16",
@@ -5128,6 +5468,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ops/model_levers_resolve.rs",
       "doc": "Sets `mtp_kv_exact` (read in `crates/model-layers/src/layers/ops/model_levers_resolve.rs`). `1` turns it on."
+    },
+    {
+      "env": "METRALE_MTP_KV_GEMV",
+      "path": "speculative.mtp_kv_gemv",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/mtp_head/row_dispatch.rs",
+      "doc": "Keeps the MTP head's small-N projections on the per-row GEMV loop. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_MTP_K_LADDER",
@@ -5450,6 +5800,36 @@
       "doc": "`METRALE_NO_BATCH8_RT=1` restores the classic batch8 for A/B (strict `== \"1\"`, matching the sibling levers). `1` turns it on."
     },
     {
+      "env": "METRALE_NO_BATCHED_BA_GATES",
+      "path": "scheduler.no_batched_ba_gates",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_batched.rs",
+      "doc": "Kill switch for the single-launch BA projection + GDN gates: `METRALE_NO_BATCHED_BA_GATES` set to any value, `0` included, selects the per-token GEMV + `compute_gdn_gates` pair. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_BATCHED_GDN_NORM",
+      "path": "scheduler.no_batched_gdn_norm",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_batched.rs",
+      "doc": "Kill switch for the single-launch gated RMS norm: `METRALE_NO_BATCHED_GDN_NORM` set to any value, `0` included, selects the per-token loop. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_BATCHED_SSM_ROLLBACK",
+      "path": "scheduler.no_batched_ssm_rollback",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/ssm_batched_copy.rs",
+      "doc": "Kill switch: `METRALE_NO_BATCHED_SSM_ROLLBACK`, set to any value, forces the loop everywhere. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_NO_BORROW_STREAK_LIMIT",
       "path": "scheduler.no_borrow_streak_limit",
       "type": "text",
@@ -5460,6 +5840,26 @@
       "doc": "Kill switch: `METRALE_NO_BORROW_STREAK_LIMIT` (any non-empty value disables the guard, `0` included; a gate record discloses it in `PERF_CONTROLS` with default `unset`)."
     },
     {
+      "env": "METRALE_NO_CANONICAL_VERIFY_KEY",
+      "path": "speculative.no_canonical_verify_key",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/speculative/verify_key.rs",
+      "doc": "`METRALE_NO_CANONICAL_VERIFY_KEY`, present with any value (`0` included), turns the canonical arm off at every width. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_DECODE_GRAPHS_MULTISEQ",
+      "path": "kernels.no_decode_graphs_multiseq",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/decode_a2.rs",
+      "doc": "Multi-sequence decode CUDA graphs: on unless `METRALE_NO_DECODE_GRAPHS_MULTISEQ` is exactly `1`. `1` turns it on."
+    },
+    {
       "env": "METRALE_NO_DECODE_SPLIT_SILU",
       "path": "kernels.no_decode_split_silu",
       "type": "switch",
@@ -5468,6 +5868,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ops/model_levers_resolve.rs",
       "doc": "`METRALE_NO_DECODE_SPLIT_SILU` stays the PRESENCE kill switch, unchanged, and still wins. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_DFLASH_FP8_RT",
+      "path": "speculative.no_dflash_fp8_rt",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/dflash_head.rs",
+      "doc": "Read once: false only when `METRALE_NO_DFLASH_FP8_RT=1`, so the kernel choice stays fixed across CUDA-graph captures. `1` turns it on."
     },
     {
       "env": "METRALE_NO_DRAFTER_SMALL_M_TIER",
@@ -5520,6 +5930,46 @@
       "doc": "Down-projection MMQ arm (DEFAULT ON; kill-switch METRALE_NO_FFN_NVFP4_MMQ_DOWN=1): route down through the same MMQ arm (t_m128 runs the narrow-N down at only ~34 TFLOP/s in-model). Any value turns it on, `0` included."
     },
     {
+      "env": "METRALE_NO_FP8_MOE_GROUPED_DECODE",
+      "path": "kernels.no_fp8_moe_grouped_decode",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/moe/forward_fp8_grouped_decode.rs",
+      "doc": "`METRALE_NO_FP8_MOE_GROUPED_DECODE`, set to any value, turns this path off. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_FP8_QKV_BATCH",
+      "path": "scheduler.no_fp8_qkv_batch",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_attention/trait_impl/multi_seq/qkv_fp8_batch.rs",
+      "doc": "Kill switch for this tier: `METRALE_NO_FP8_QKV_BATCH` set to any value keeps the per-sequence scalar loop. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_FUSED_QKV",
+      "path": "cache.no_fused_qkv",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_attention/trait_impl/multi_seq/qkv.rs",
+      "doc": "The fused `[q | k | v]` GEMM in `ms_qkv_batchn` (one launch instead of three) is on unless `METRALE_NO_FUSED_QKV=1`, read once per process. `1` turns it on."
+    },
+    {
+      "env": "METRALE_NO_GDN_FLA",
+      "path": "kernels.no_gdn_fla",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_prefill_recur.rs",
+      "doc": "FLA chunked prefill (`gdn_prefill_fla`) runs for 128-dim heads when its kernels and scratch are present, METRALE_NO_GDN_FLA is not 1, and this is not an exact replay. `1` turns it on."
+    },
+    {
       "env": "METRALE_NO_GDN_FP8",
       "path": "kernels.no_gdn_fp8",
       "type": "switch",
@@ -5570,6 +6020,36 @@
       "doc": "Sets `gdn_regresident` (read in `crates/model-layers/src/layers/ops/model_levers_resolve.rs`). `1` turns it on."
     },
     {
+      "env": "METRALE_NO_GDN_WY2_RESIDENT",
+      "path": "kernels.no_gdn_wy2_resident",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_batched_conv_gdn/wy_select.rs",
+      "doc": "Kill switch for the register-resident wy2 twin: `METRALE_NO_GDN_WY2_RESIDENT` set to any value, `0` included, disables it. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_GDN_WY3_RESIDENT",
+      "path": "kernels.no_gdn_wy3_resident",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_batched_conv_gdn/wy_select.rs",
+      "doc": "Kill switch for the register-resident wy3 twin, separate from wy2's: `METRALE_NO_GDN_WY3_RESIDENT` set to any value, `0` included, disables it. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_GEMV_EXACT_M_TIERS",
+      "path": "storage.no_gemv_exact_m_tiers",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/w4a16_gemv_tiers.rs",
+      "doc": "`METRALE_NO_GEMV_EXACT_M_TIERS` (presence-checked: any value, including `0`, disables) hides widths 5/6/7 from the decision, leaving widths 4 and 8. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_NO_GEMV_SW",
       "path": "kernels.no_gemv_sw",
       "type": "text",
@@ -5578,6 +6058,26 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/mtp_head/new.rs",
       "doc": "Read in `crates/model-layers/src/layers/mtp_head/new.rs`."
+    },
+    {
+      "env": "METRALE_NO_GLM_MOE_ROW_BATCH",
+      "path": "scheduler.no_glm_moe_row_batch",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-arch/src/glm5next_mlp/forward.rs",
+      "doc": "`METRALE_NO_GLM_MOE_ROW_BATCH=1` turns the row-batched routed path off; each row then runs its own expert launches. `1` turns it on."
+    },
+    {
+      "env": "METRALE_NO_GRAPH_BORROW",
+      "path": "scheduler.no_graph_borrow",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/graph_borrow.rs",
+      "doc": "`METRALE_NO_GRAPH_BORROW` (presence; `=0` also disables) turns borrowing off. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_NO_HW_PRECHECK",
@@ -5610,6 +6110,16 @@
       "doc": "**ON by default**; `METRALE_NO_K64_PIPELINE3` (presence — `=0` is NOT \"off\") falls back to the 2-stage parent. Any value turns it on, `0` included."
     },
     {
+      "env": "METRALE_NO_LMHEAD_BATCHED_WIDE",
+      "path": "scheduler.no_lmhead_batched_wide",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/impl_a3_lm_head.rs",
+      "doc": "Setting `METRALE_NO_LMHEAD_BATCHED_WIDE` to any value, `0` included, turns it off and leaves those row counts on `w4a16_gemm`. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_NO_LMHEAD_TGEMM",
       "path": "kernels.no_lmhead_tgemm",
       "type": "switch",
@@ -5630,6 +6140,16 @@
       "doc": "Kill switch: `METRALE_NO_LMHEAD_VOCAB_TP=1`. `1` turns it on."
     },
     {
+      "env": "METRALE_NO_LM_HEAD_BATCH_GEMV",
+      "path": "scheduler.no_lm_head_batch_gemv",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/lm_head_batched.rs",
+      "doc": "Batched GEMV for the NVFP4 decode head: on unless `METRALE_NO_LM_HEAD_BATCH_GEMV` is exactly `1`. `1` turns it on."
+    },
+    {
       "env": "METRALE_NO_MAPPED_ARGMAX",
       "path": "runtime.no_mapped_argmax",
       "type": "switch",
@@ -5638,6 +6158,36 @@
       "class": "runtime",
       "reader": "crates/model-engine/src/model/trait_impl/verify_e.rs",
       "doc": "Kill switch METRALE_NO_MAPPED_ARGMAX=1 restores scratch + on-stream copy. `1` turns it on."
+    },
+    {
+      "env": "METRALE_NO_MMQ_SMALL_TILE",
+      "path": "kernels.no_mmq_small_tile",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/dense_ffn.rs",
+      "doc": "The 16/32/64-row MMQ tiles: on unless `METRALE_NO_MMQ_SMALL_TILE` is exactly `1`. `1` turns it on."
+    },
+    {
+      "env": "METRALE_NO_MMQ_TILE64",
+      "path": "kernels.no_mmq_tile64",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/dense_ffn.rs",
+      "doc": "The 64-row MMQ tile: on unless `METRALE_NO_MMQ_TILE64` is exactly `1`; `METRALE_NO_MMQ_SMALL_TILE=1` also turns it off. `1` turns it on."
+    },
+    {
+      "env": "METRALE_NO_MOE_GROUPED_DECODE",
+      "path": "kernels.no_moe_grouped_decode",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/moe_grouped_decode.rs",
+      "doc": "Turns the grouped MoE decode arm off at every width, even when `METRALE_MOE_GROUPED_DECODE` forces it. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_NO_MTP_BATCH_BOOTSTRAP",
@@ -5680,6 +6230,16 @@
       "doc": "Batched bootstrap argmax; kill switch `METRALE_NO_MTP_BOOT_ARGMAX` (presence). Any value turns it on, `0` included."
     },
     {
+      "env": "METRALE_NO_MTP_BOOT_GRAPH",
+      "path": "speculative.no_mtp_boot_graph",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/decode_graph_key.rs",
+      "doc": "On unless `METRALE_NO_MTP_BOOT_GRAPH` is set to any value, `0` included; off, those batches run eager. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_NO_MTP_DCUT",
       "path": "speculative.no_mtp_dcut",
       "type": "switch",
@@ -5698,6 +6258,26 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/drafter_context.rs",
       "doc": "Kill switch — disables BOTH halves. `1` turns it on."
+    },
+    {
+      "env": "METRALE_NO_MTP_EAGER_DRAFTER",
+      "path": "speculative.no_mtp_eager_drafter",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/drafter_prefill.rs",
+      "doc": "`METRALE_NO_MTP_EAGER_DRAFTER` turns the eager consume off, leaving the consume at the first propose. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_MTP_EP_PROPOSE",
+      "path": "speculative.no_mtp_ep_propose",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/speculative/knobs.rs",
+      "doc": "On unless `METRALE_NO_MTP_EP_PROPOSE=1`; read once per process. `1` turns it on."
     },
     {
       "env": "METRALE_NO_MTP_K_LADDER",
@@ -5740,6 +6320,16 @@
       "doc": "`METRALE_NO_MTP_TC` is the same kind of PRESENCE kill switch as `METRALE_NO_W4A16_TC`, for the MTP drafter's tensor-core BF16 GEMV: default `unset` (the path ran), any set value disclosed verbatim."
     },
     {
+      "env": "METRALE_NO_MTP_VERIFY_GRAPHS",
+      "path": "speculative.no_mtp_verify_graphs",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/verify_e2.rs",
+      "doc": "Batched-verify CUDA graphs are on unless `METRALE_NO_MTP_VERIFY_GRAPHS` is present, whatever its value. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_NO_MTP_VERIFY_SAMPLE",
       "path": "speculative.no_mtp_verify_sample",
       "type": "switch",
@@ -5748,6 +6338,16 @@
       "class": "runtime",
       "reader": "crates/server/src/scheduler/levers.rs",
       "doc": "Ships ON; `METRALE_NO_MTP_VERIFY_SAMPLE=1` opts out. `1` turns it on."
+    },
+    {
+      "env": "METRALE_NO_PINNED_VERIFY_D2H",
+      "path": "speculative.no_pinned_verify_d2h",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/verify_e2.rs",
+      "doc": "`METRALE_NO_PINNED_VERIFY_D2H=1`: read the batched-verify argmax with an on-stream copy into pageable memory. `1` turns it on."
     },
     {
       "env": "METRALE_NO_PREFILL_ROW_SHIFT",
@@ -5778,6 +6378,16 @@
       "class": "runtime",
       "reader": "crates/model-arch/src/weight_loader/qwen35_dense.rs",
       "doc": "METRALE_NO_Q2_GDN forces the BF16/NVFP4 path for A/B bisection. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_QKVZ_NVFP4_DECODE",
+      "path": "cache.no_qkvz_nvfp4_decode",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_batched.rs",
+      "doc": "Kill switch for the NVFP4 QKVZ arm above `VERIFY_TGEMM_MIN_TOKENS` rows: `METRALE_NO_QKVZ_NVFP4_DECODE` set to any value, `0` included, keeps the FP8 prefill-copy arm. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_NO_QK_NORM_STRIDED",
@@ -5828,6 +6438,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ops/model_levers_resolve.rs",
       "doc": "Sets `ssd` (read in `crates/model-layers/src/layers/ops/model_levers_resolve.rs`). Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_SSM_FFN_PREFILL",
+      "path": "scheduler.no_ssm_ffn_prefill",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_multi_seq.rs",
+      "doc": "The batched dense FFN arm is on unless `METRALE_NO_SSM_FFN_PREFILL` is exactly `1`. `1` turns it on."
     },
     {
       "env": "METRALE_NO_SSM_FP8_PREFILL",
@@ -5920,6 +6540,16 @@
       "doc": "Gates, in order: explicit `--no-tui`, `METRALE_NO_TUI=1`, non-interactive stdout OR stdin (docker `-t` without `-i` therefore stays plain), and `TERM=dumb`. `1` turns it on."
     },
     {
+      "env": "METRALE_NO_VERIFY_GDN_BATCH",
+      "path": "speculative.no_verify_gdn_batch",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_batched_conv_gdn_multi.rs",
+      "doc": "`METRALE_NO_VERIFY_GDN_BATCH` set to any value, `0` included, turns this path off. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_NO_VERIFY_OUTPROJ_TGEMM",
       "path": "speculative.no_verify_outproj_tgemm",
       "type": "switch",
@@ -5928,6 +6558,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/qwen3_ssm/trait_decode_batched.rs",
       "doc": "Kill switch METRALE_NO_VERIFY_OUTPROJ_TGEMM (PRESENCE check). 2026-08-17: the call now goes through `ms_proj_gemm` rather than `deep_k_gemm` directly. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_NO_VERIFY_WY_CACHE",
+      "path": "speculative.no_verify_wy_cache",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/verify_e2.rs",
+      "doc": "The WY-table staging cache is on unless `METRALE_NO_VERIFY_WY_CACHE` is present, whatever its value. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_NO_W4A16_K64",
@@ -5948,6 +6588,16 @@
       "class": "runtime",
       "reader": "crates/bench/src/gate/record_env.rs",
       "doc": "`METRALE_NO_W4A16_TC` is a PRESENCE kill switch (any non-empty value, `0` included, turns the tensor-core small-M NVFP4 GEMV off), so its default is the literal `unset`, the one value under which..."
+    },
+    {
+      "env": "METRALE_NO_W8A8_DECODE_PROJ",
+      "path": "kernels.no_w8a8_decode_proj",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/ops/dispatch_proj_decode.rs",
+      "doc": "Kill switch: `METRALE_NO_W8A8_DECODE_PROJ` set to any value, empty and `0` included, turns this route off. Any value turns it on, `0` included."
     },
     {
       "env": "METRALE_NUMERIC_RNE_CHILD",
@@ -6080,6 +6730,16 @@
       "doc": "PLE scratch is sized once, for the largest prefill CHUNK a pass can present — not the model's context."
     },
     {
+      "env": "METRALE_PLE_SERIAL_FAULT",
+      "path": "model.ple_serial_fault",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/storage/src/ngram_cache_fault.rs",
+      "doc": "`METRALE_PLE_SERIAL_FAULT=1` faults every batch serially. `1` turns it on."
+    },
+    {
       "env": "METRALE_PLE_TEST_DATA",
       "path": "dev.ple_test_data",
       "type": "path",
@@ -6150,6 +6810,16 @@
       "doc": "Absent flag ⇒ never called ⇒ the documented `METRALE_PREFILL_VARLEN` fallback stays reachable."
     },
     {
+      "env": "METRALE_PREFIX_SUBBLOCK",
+      "path": "cache.prefix_subblock",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/cache/src/radix_tree/partial_tail.rs",
+      "doc": "Sub-block tail matching in the radix tree (unsound; see `partial_tail.rs`). Any value other than `0` or `1` is refused and leaves it off. `1` turns it on."
+    },
+    {
       "env": "METRALE_PROBE_FP8FP8",
       "path": "dev.probe_fp8fp8",
       "type": "switch",
@@ -6210,6 +6880,16 @@
       "doc": "In THIS crate codispatch is one of TWO ways to enable the same path, OR-ed with the older `METRALE_Q12_BATCHED_FIRST_CHUNK` spelling; in `metrale-server` it is a standalone scheduling switch."
     },
     {
+      "env": "METRALE_Q12_EFFECTIVE_ARENA",
+      "path": "kernels.q12_effective_arena",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/prefill_b/batch_kernel/eligible.rs",
+      "doc": "The caller passes `eff_len == chunk_len` unless `METRALE_Q12_EFFECTIVE_ARENA=1` probed a hit. `1` turns it on."
+    },
+    {
       "env": "METRALE_QLEN",
       "path": "dev.qlen",
       "type": "int",
@@ -6260,6 +6940,16 @@
       "doc": "Kill switch: METRALE_QSA_NO_PREFILL_SELECT=1 keeps stage-1 behavior (dense prefill past the bound; decode still selects). `1` turns it on."
     },
     {
+      "env": "METRALE_QSA_S2_DIAG",
+      "path": "telemetry.qsa_s2_diag",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qsa_select.rs",
+      "doc": "METRALE_QSA_S2_DIAG=1: keep the dense context of the last row before the overwrite, and log cosine(dense, selected) after. `1` turns it on."
+    },
+    {
       "env": "METRALE_QSA_SCORE_SCALAR",
       "path": "runtime.qsa_score_scalar",
       "type": "switch",
@@ -6308,6 +6998,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ple/dump.rs",
       "doc": "Off unless `METRALE_QWEN4EXP_DUMP` names a directory."
+    },
+    {
+      "env": "METRALE_QWEN4EXP_NO_HC_GEMM",
+      "path": "kernels.qwen4exp_no_hc_gemm",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/ops/hyper_connection_lowrank.rs",
+      "doc": "The large-T hyper-connection collapse runs the fused FP32 kernel instead of the GEMM path, which rounds `normed` to BF16 before the projections. `1` turns it on."
     },
     {
       "env": "METRALE_QWEN4EXP_NO_PLE",
@@ -6510,6 +7210,16 @@
       "doc": "Disable with `METRALE_RMS_NORM_WARP_ROW=0`. `0` turns it off."
     },
     {
+      "env": "METRALE_SEQ_MEMTRACE",
+      "path": "telemetry.seq_memtrace",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/seq_memtrace.rs",
+      "doc": "Off unless `METRALE_SEQ_MEMTRACE` is set, to any value including `0`; when off, a call costs one `OnceLock` read. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_SHARED_FP8_PREFILL",
       "path": "scheduler.shared_fp8_prefill",
       "type": "switch",
@@ -6528,6 +7238,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ops/model_levers_resolve.rs",
       "doc": "Sets `shared_w4a4_down` (read in `crates/model-layers/src/layers/ops/model_levers_resolve.rs`). Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_SIMHASH_LOOP",
+      "path": "scheduler.simhash_loop",
+      "type": "switch",
+      "default": "on",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/server/src/api/chat_stream/handle_token.rs",
+      "doc": "`METRALE_SIMHASH_LOOP=0` turns the SimHash semantic-loop guard off; unset or any other value leaves it on. `0` turns it off."
     },
     {
       "env": "METRALE_SKIP_BUILD",
@@ -6790,6 +7510,16 @@
       "doc": "Sets `ssm_ms_profile` (read in `crates/model-layers/src/layers/ops/model_levers_resolve.rs`). `1` turns it on."
     },
     {
+      "env": "METRALE_SSM_OUT_W8A16_ONLY",
+      "path": "kernels.ssm_out_w8a16_only",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/qwen3_ssm/prefill_out_w8a8.rs",
+      "doc": "`METRALE_SSM_OUT_W8A16_ONLY`, read by presence (any value, empty and `0` included) once per process. Any value turns it on, `0` included."
+    },
+    {
       "env": "METRALE_SSM_PIPELINE_DEPTH",
       "path": "kernels.ssm_pipeline_depth",
       "type": "int",
@@ -6888,6 +7618,16 @@
       "class": "runtime",
       "reader": "crates/model-engine/src/model/ssm_tier/fingerprint.rs",
       "doc": "Marconi swap namespace: `METRALE_SSM_SWAP_NS` override (strict — junk or 0 is a startup ERROR, never a silent fallthrough) else the fingerprint. Any value turns it on, `0` included."
+    },
+    {
+      "env": "METRALE_SSM_TAIL_CKPT",
+      "path": "scheduler.ssm_tail_ckpt",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/gpu-runtime/src/lib.rs",
+      "doc": "Tail-checkpoint chunk split (see `ssm_tail_boundary`). `1` turns it on."
     },
     {
       "env": "METRALE_SSM_TAIL_LEASE_TTL",
@@ -7180,6 +7920,16 @@
       "doc": "`build_jinja_env` reads `METRALE_USE_HF_REF_JSON_DUMPS` once and forwards the result here; tests that need the spaced form ask for it by name. `1` turns it on."
     },
     {
+      "env": "METRALE_VERIFY_D2H_DEFAULT_STREAM",
+      "path": "speculative.verify_d2h_default_stream",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-engine/src/model/trait_impl/verify_e2.rs",
+      "doc": "`METRALE_VERIFY_D2H_DEFAULT_STREAM=1`: read the batched-verify argmax with `copy_d2h`. `1` turns it on."
+    },
+    {
       "env": "METRALE_VISION_ATTN_LEGACY",
       "path": "kernels.vision_attn_legacy",
       "type": "switch",
@@ -7318,6 +8068,16 @@
       "class": "runtime",
       "reader": "crates/model-layers/src/layers/ops/w4a4_proj/mx_plan.rs",
       "doc": "Which `w4a4_gemv_mx*` entry serves an `m`-row projection, and with what launch shape: the `METRALE_W4A4_MX_NT` / `METRALE_W4A4_MX_PS` levers and the pure planning behind `mx_plan`."
+    },
+    {
+      "env": "METRALE_W4A4_PROJ_AUDIT",
+      "path": "telemetry.w4a4_proj_audit",
+      "type": "switch",
+      "default": "off",
+      "flag": null,
+      "class": "runtime",
+      "reader": "crates/model-layers/src/layers/ops/w4a4_proj.rs",
+      "doc": "A diagnostic audit of the W4A4 projection route. Any non-empty value turns it on."
     },
     {
       "env": "METRALE_W8A8_PREFILL_MAX_M_NARROWING",
